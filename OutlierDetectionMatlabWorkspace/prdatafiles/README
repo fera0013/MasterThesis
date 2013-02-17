@@ -1,0 +1,13 @@
+The files in this directory contain data used in the Listings in the book:
+
+  "Classification, parameter estimation and state estimation: an engineering
+   approach using Matlab", by F. van der Heijden, R.P.W. Duin, D. de Ridder
+   and D.M.J. Tax, Wiley, 2004.
+
+Note that Matlab should be able to find these files; i.e. the directory
+containing them should be in the path (see: PATH, ADDPATH).
+
+The Boston house-price data was used in: Harrison, D. and Rubinfeld, D.L.
+'Hedonic prices and the demand for clean air', J. Environ. Economics &
+Management, vol.5, 81-102, 1978. The data was downloaded from StatLib,
+http://lib.stat.cmu.edu.
