@@ -1,7 +1,13 @@
 library("randomForest", lib.loc="C:/Users/RalphFehrer/Documents/R/win-library/2.15")
+#Define names
+targetClassName<-"Target"
+outlierClassName<-"Outlier"
+className<-"Class"
+euclideanDistanceName<-"EuclideanDistance"
+thresholdName<-"Threshold"
 #Create randomly sampled test set with roller bearing normal features
 numberOfTestVectors<-30
-normalTestVectorsIndices<-sample(1:length(normalFeatures[,1]),30)
+normalTestVectorsIndices<-sample(1:length(normalFeatures[,1]),numberOfTestVectors)
 normalTestVectors<-normalFeatures[normalTestVectorsIndices,]
 #Create training data set with roller bearing normal features
 normalTrainingVectors<-normalFeatures[-normalTestVectorsIndices,]
@@ -16,24 +22,27 @@ windows.options(reset=TRUE)
 #Calculate class prototype of roller bearing normal data
 rollerBearingNormalClassPrototype <- classCenter(normalTrainingVectors[,-28], normalTrainingVectors[,28], rollerBearingNormalRf$prox)
 #Create Test Set with 30 test vectors of each feature set
-ballFaultTestVectorsIndices<-sample(1:length(BallFaultFeatures[,1]),30)
+ballFaultTestVectorsIndices<-sample(1:length(BallFaultFeatures[,1]),numberOfTestVectors)
 ballFaultTestVectors<-BallFaultFeatures[ballFaultTestVectorsIndices,]
-outerRacewayFaultTestVectorsIndices<-sample(1:length(OuterRacewayFeatures[,1]),30)
+outerRacewayFaultTestVectorsIndices<-sample(1:length(OuterRacewayFeatures[,1]),numberOfTestVectors)
 outerRacewayFaultTestVectors<-OuterRacewayFeatures[outerRacewayFaultTestVectorsIndices,]
-innerRacewayFaultTestVectorsIndices<-sample(1:length(InnerRacewayFeatures[,1]),30)
+innerRacewayFaultTestVectorsIndices<-sample(1:length(InnerRacewayFeatures[,1]),numberOfTestVectors)
 innerRacewayFaultTestVectors<-InnerRacewayFeatures[innerRacewayFaultTestVectorsIndices,]
 rollerBearingTestSet<-rbind(normalTestVectors,ballFaultTestVectors,outerRacewayFaultTestVectors,innerRacewayFaultTestVectors)
 #Calculate Euclidean Distances between test vectors and normal features prototype
 EuclideanDistanceToNormalPrototype<-function (vector) {
   return(sqrt(sum((vector- normalFeatureClassPrototype) ^ 2)))
 }
-euclideanDistanceName<-"EuclideanDistance"
 euclideanDistances<-apply(rollerBearingTestSet[,-28],1,EuclideanDistanceToNormalPrototype)
 rollerBearingTestSet[euclideanDistanceName]<-euclideanDistances
 #Plot the results
 numericalClassValues<-rep(2,length(euclideanDistances))
-numericalClassValues[rollerBearingTestSet$Class=="Target"]<-1
-plot(euclideanDistances,xlab="Test vectors ",ylab="Euclid. Distance",col=c("red","blue")[numericalClassValues])
+numericalClassValues[rollerBearingTestSet$Class==targetClassName]<-1
+plot(euclideanDistances,xlab="Test vectors ",ylab="Euclid. Distance",pch=c(2,1)[numericalClassValues])
 title("Euclidean distances between 
       Roller Bearing test vectors and target prototype")
-legend("topleft",cex=0.75, inset=.05,c("Normal","Outlier"), pch=c(1,1), col=c("red", "blue"))
+#Set the threshold separating normal conditions from faulty conditions
+targetClassTestVectors<-subset(rollerBearingTestSet,rollerBearingTestSet$Class==targetClassName)
+threshold<-max(targetClassTestVectors[,euclideanDistanceName])
+abline(h=threshold,lty=2)
+legend("topleft",cex=0.75, inset=.05,c(targetClassName,outlierClassName,thresholdName), pch=c(2,1,NA),lty=c(NA,NA,2))
