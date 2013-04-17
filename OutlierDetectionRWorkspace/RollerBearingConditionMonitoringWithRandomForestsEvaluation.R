@@ -18,7 +18,17 @@ rollerBearingAttributeImportance<-rollerBearingNormalRf$importance[,1]
 sortedRollerBearingAttributeImportance<-sort(rollerBearingAttributeImportance)
 windows.options(width=10, height=50)
 barplot(sortedRollerBearingAttributeImportance, horiz=TRUE,cex.names=0.6,las = 1,main="Normal Features Attribute importance",xlab="Mean Decrease in Accuracy",space=0.5)
+#build in plot for attribute importance
+varImpPlot(rollerBearingNormalRf,cex=0.6)
 windows.options(reset=TRUE)
+#Scaling plot
+MDSplot(rollerBearingNormalRf,normalTrainingVectors$Class)
+#calculate outlier measures 
+rollerBearingTrainingSetOutliers<-outlier(rollerBearingNormalRf)
+numericalClassValues<-rep(2,length(normalTrainingVectors))
+numericalClassValues[normalTrainingVectors$Class==targetClassName]<-1
+plot(rollerBearingTrainingSetOutliers,type="l",xlab="Training data vectors",ylab="Outlying measure")
+title("Outlier measures of normal roller bearing data")
 #Calculate class prototype of roller bearing normal data
 rollerBearingNormalClassPrototype <- classCenter(normalTrainingVectors[,-28], normalTrainingVectors[,28], rollerBearingNormalRf$prox)
 #Create Test Set with 30 test vectors of each feature set
