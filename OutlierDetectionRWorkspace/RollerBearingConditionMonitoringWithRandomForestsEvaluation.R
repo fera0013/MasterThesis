@@ -55,4 +55,4 @@ title("Euclidean distances between
 targetClassTestVectors<-subset(rollerBearingTestSet,rollerBearingTestSet$Class==targetClassName)
 threshold<-max(targetClassTestVectors[,euclideanDistanceName])
 abline(h=threshold,lty=2)
-legend("topleft",cex=0.75, inset=.05,c(targetClassName,outlierClassName,thresholdName), pch=c(2,1,NA),lty=c(NA,NA,2))
+legend("topleft",cex=0.75, inset=.05,c("Normal",outlierClassName,thresholdName), pch=c(2,1,NA),lty=c(NA,NA,2))

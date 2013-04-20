@@ -7,37 +7,39 @@ euclideanDistanceName<-"EuclideanDistance"
 thresholdName<-"Threshold"
 predictedName<-"Predicted"
 #Create randomly sampled test set with roller bearing normal features
-numberOfTestVectors<-100
-normalTestVectorsIndices<-sample(1:length(normalFeatures[,1]),numberOfTestVectors)
-normalTestVectors<-normalFeatures[normalTestVectorsIndices,]
+sizeOfTestSet<-25
+normalTestSetIndices<-sample(row(normalFeatures),sizeOfTestSet)
+normalTestSet<-normalFeatures[normalTestSetIndices,]
+#Create randomly sampled validation set with roller bearing normal features
+sizeOfTrainingSet2<-100
+trainingSet2Indices<-sample(row(normalFeatures[-normalTestSetIndices]),sizeOfTrainingSet2)
+trainingSet2<-normalFeatures[trainingSet2Indices,]
 #Training 
 #Create training data set with roller bearing normal features
-normalTrainingVectors<-normalFeatures[-normalTestVectorsIndices,]
+trainingSet1<-normalFeatures[-c(normalTestSetIndices,trainingSet2Indices),]
 #Construct unsupervised random forest with roller bearings training data set
-rollerBearingNormalRf<-randomForest(normalTrainingVectors[,-28],proximity=TRUE,importance=TRUE)
+rollerBearingNormalRf<-randomForest(trainingSet1[,-28],proximity=TRUE,importance=TRUE)
 #Calculate class prototype of roller bearing normal data
-rollerBearingNormalClassPrototype <- classCenter(normalTrainingVectors[,-28], normalTrainingVectors[,28], rollerBearingNormalRf$prox)
+rollerBearingNormalClassPrototype <- classCenter(trainingSet1[,-28], trainingSet1[,28], rollerBearingNormalRf$prox)
 #Calculate Euclidean Distances between test vectors and normal features prototype
 EuclideanDistanceToNormalPrototype<-function (vector) {
-    return(sqrt(sum((vector- normalFeatureClassPrototype) ^ 2)))
+    return(sqrt(sum((vector- rollerBearingNormalClassPrototype) ^ 2)))
   }
-euclideanDistancesOfTargetVectors<-apply(normalTestVectors[,-28],1,EuclideanDistanceToNormalPrototype)
-normalTestVectors[euclideanDistanceName]<-euclideanDistancesOfTargetVectors
-threshold<-max(normalTestVectors[,euclideanDistanceName])
+euclideanDistancesOfTargetVectors<-apply(trainingSet2[,-28],1,EuclideanDistanceToNormalPrototype)
+trainingSet2[euclideanDistanceName]<-euclideanDistancesOfTargetVectors
+threshold<-max(trainingSet2[,euclideanDistanceName])
 #Classification
 #Create Test Set with [numberOfTestVectors] test vectors of each outlier feature set
-ballFaultTestVectorsIndices<-sample(1:length(BallFaultFeatures[,1]),numberOfTestVectors)
-ballFaultTestVectors<-BallFaultFeatures[ballFaultTestVectorsIndices,]
-outerRacewayFaultTestVectorsIndices<-sample(1:length(OuterRacewayFeatures[,1]),numberOfTestVectors)
-outerRacewayFaultTestVectors<-OuterRacewayFeatures[outerRacewayFaultTestVectorsIndices,]
-innerRacewayFaultTestVectorsIndices<-sample(1:length(InnerRacewayFeatures[,1]),numberOfTestVectors)
-innerRacewayFaultTestVectors<-InnerRacewayFeatures[innerRacewayFaultTestVectorsIndices,]
-outlierTestSet<-rbind(ballFaultTestVectors,outerRacewayFaultTestVectors,innerRacewayFaultTestVectors)
+ballFaultTestSetIndices<-sample(1:length(BallFaultFeatures[,1]),sizeOfTestSet)
+ballFaultTestSet<-BallFaultFeatures[ballFaultTestSetIndices,]
+outerRacewayFaultTestSetIndices<-sample(1:length(OuterRacewayFeatures[,1]),sizeOfTestSet)
+outerRacewayFaultTestSet<-OuterRacewayFeatures[outerRacewayFaultTestSetIndices,]
+innerRacewayFaultTestSetIndices<-sample(1:length(InnerRacewayFeatures[,1]),sizeOfTestSet)
+innerRacewayFaultTestSet<-InnerRacewayFeatures[innerRacewayFaultTestSetIndices,]
+completeTestSet<-rbind(normalTestSet,ballFaultTestSet,outerRacewayFaultTestSet,innerRacewayFaultTestSet)
 #Calculate Euclidean distance between outlier test vectors and normal prototype
-euclideanDistancesOfOutlierVectors<-apply(outlierTestSet[,-28],1,EuclideanDistanceToNormalPrototype)
-outlierTestSet[euclideanDistanceName]<-euclideanDistancesOfOutlierVectors
-#Create Complete testset
-completeTestSet<-rbind(normalTestVectors,outlierTestSet)
+euclideanDistancesOfTestSet<-apply(completeTestSet[,-28],1,EuclideanDistanceToNormalPrototype)
+completeTestSet[euclideanDistanceName]<-euclideanDistancesOfTestSet
 #Classify complete set
 predictedClasses<-ifelse(completeTestSet[,euclideanDistanceName]<=threshold, targetClassName, outlierClassName)
 completeTestSet[predictedName]<-predictedClasses
