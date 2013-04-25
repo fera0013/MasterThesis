@@ -1,4 +1,4 @@
-library("randomForest", lib.loc="C:/Users/RalphFehrer/Documents/R/win-library/2.15")
+ibrary("randomForest", lib.loc="C:/Users/RalphFehrer/Documents/R/win-library/2.15")
 library("mda", lib.loc="C:/Users/RalphFehrer/Documents/R/win-library/2.15")
 #Define names
 targetClassName<-"Target"
@@ -24,8 +24,8 @@ rollerBearingNormalRf<-randomForest(trainingSet1[,-28],proximity=TRUE,importance
 rollerBearingNormalClassPrototype <- classCenter(trainingSet1[,-28], trainingSet1[,28], rollerBearingNormalRf$prox)
 #Calculate Euclidean Distances between test vectors and normal features prototype
 EuclideanDistanceToNormalPrototype<-function (vector) {
-    return(sqrt(sum((vector- rollerBearingNormalClassPrototype) ^ 2)))
-  }
+  return(sqrt(sum((vector- rollerBearingNormalClassPrototype) ^ 2)))
+}
 euclideanDistancesOfTargetVectors<-apply(trainingSet2[,-28],1,EuclideanDistanceToNormalPrototype)
 trainingSet2[euclideanDistanceName]<-euclideanDistancesOfTargetVectors
 threshold<-max(trainingSet2[,euclideanDistanceName])
@@ -51,3 +51,11 @@ acceptedOutliersRatio<-numberOfAcceptedOutliers/sum(rollerBearingTestSetConfusio
 #Calculate type 2 error as the ratio of rejected targets
 numberOfRejectedTargets<-rollerBearingTestSetConfusionMatrix[outlierClassName,targetClassName]
 rejectedTargetsRatio<-numberOfRejectedTargets/sum(rollerBearingTestSetConfusionMatrix[,])
+#Retrain RF with 10 most important attributes
+rollerBearingNormalDataAttributeImportance<-importance(rollerBearingNormalRf,type=1)
+varImpPlot(rollerBearingNormalRf)
+rollerBearingFeatureNames<-colnames(rollerBearingTestSet)[1:27]
+rollerBearingAttributeImportanceTable<-data.frame(Feature=rollerBearingFeatureNames,AccuracyDecrease=rollerBearingNormalDataAttributeImportance)
+rollerBearingAttributeImportanceTable<-rollerBearingAttributeImportanceTable[order(rollerBearingAttributeImportanceTable$MeanDecreaseAccuracy),]
+rollerBearingTenMostImportantFeatures<-rownames(rollerBearingAttributeImportanceTable)[1:10]
+rollerBearingNormalRf<-randomForest(trainingSet1[,rollerBearingTenMostImportantFeatures],proximity=TRUE,importance=TRUE)

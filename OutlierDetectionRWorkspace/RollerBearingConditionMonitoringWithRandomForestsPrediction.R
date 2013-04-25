@@ -24,8 +24,8 @@ rollerBearingNormalRf<-randomForest(trainingSet1[,-28],proximity=TRUE,importance
 rollerBearingNormalClassPrototype <- classCenter(trainingSet1[,-28], trainingSet1[,28], rollerBearingNormalRf$prox)
 #Calculate Euclidean Distances between test vectors and normal features prototype
 EuclideanDistanceToNormalPrototype<-function (vector) {
-    return(sqrt(sum((vector- rollerBearingNormalClassPrototype) ^ 2)))
-  }
+  return(sqrt(sum((vector- rollerBearingNormalClassPrototype) ^ 2)))
+}
 euclideanDistancesOfTargetVectors<-apply(trainingSet2[,-28],1,EuclideanDistanceToNormalPrototype)
 trainingSet2[euclideanDistanceName]<-euclideanDistancesOfTargetVectors
 threshold<-max(trainingSet2[,euclideanDistanceName])
