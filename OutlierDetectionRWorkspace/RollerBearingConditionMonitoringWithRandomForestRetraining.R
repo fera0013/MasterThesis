@@ -10,7 +10,7 @@ predictedName<-"Predicted"
 #Create randomly sampled test set with roller bearing normal features
 #Create randomly sampled validation set with roller bearing normal features
 #Create training data set with roller bearing normal features
-sizeOfTestSet<-25
+sizeOfTestSet<-75
 normalTestSetIndices<-sample(row(normalFeatures),sizeOfTestSet)
 normalTestSet<-normalFeatures[normalTestSetIndices,]
 trainingSet<-normalFeatures[-normalTestSetIndices,]
@@ -30,4 +30,4 @@ rollerBearingAttributeImportanceTable<-data.frame(Feature=rollerBearingFeatureNa
 rollerBearingAttributeImportanceTable<-rollerBearingAttributeImportanceTable[order(rollerBearingAttributeImportanceTable$MeanDecreaseAccuracy),]
 reducedTrainingSet<-trainingSet[,as.character(rollerBearingAttributeImportanceTable$Feature[1:15])]
 reducedTestSet<-completeTestSet[,as.character(rollerBearingAttributeImportanceTable$Feature[1:15])]
-rollerBearingRandomForestClassificationWith10MostImportantAttributes<-OneClassRandomForest(reducedTrainingSet,trainingSet[,28],reducedTestSet,completeTestSet[,28])
+rollerBearingRandomForestClassificationWithReducedAttributes<-OneClassRandomForest(reducedTrainingSet,trainingSet[,28],reducedTestSet,completeTestSet[,28])
