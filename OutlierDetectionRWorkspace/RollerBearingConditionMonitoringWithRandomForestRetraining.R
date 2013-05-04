@@ -7,11 +7,9 @@ className<-"Class"
 euclideanDistanceName<-"EuclideanDistance"
 thresholdName<-"Threshold"
 predictedName<-"Predicted"
-#Create randomly sampled test set with roller bearing normal features
-#Create randomly sampled validation set with roller bearing normal features
-#Create training data set with roller bearing normal features
-sizeOfTestSet<-75
-normalTestSetIndices<-sample(row(normalFeatures),sizeOfTestSet)
+#Create data sets
+sizeOfTestSet<-25
+normalTestSetIndices<-sample(row(normalFeatures),sizeOfTestSet*3)
 normalTestSet<-normalFeatures[normalTestSetIndices,]
 trainingSet<-normalFeatures[-normalTestSetIndices,]
 ballFaultTestSetIndices<-sample(1:length(BallFaultFeatures[,1]),sizeOfTestSet)
@@ -21,13 +19,20 @@ outerRacewayFaultTestSet<-OuterRacewayFeatures[outerRacewayFaultTestSetIndices,]
 innerRacewayFaultTestSetIndices<-sample(1:length(InnerRacewayFeatures[,1]),sizeOfTestSet)
 innerRacewayFaultTestSet<-InnerRacewayFeatures[innerRacewayFaultTestSetIndices,]
 completeTestSet<-rbind(normalTestSet,ballFaultTestSet,outerRacewayFaultTestSet,innerRacewayFaultTestSet)
-randomForestClassification<- OneClassRandomForest(trainingSet[,-28],trainingSet[,28],completeTestSet[,-28],completeTestSet[,28])
+rollerBearingRandomForestClassification<- OneClassRandomForest(trainingSet[,-28],trainingSet[,28],completeTestSet[,-28],completeTestSet[,28])
+rollerBearingRandomForestClassification$Confusion
+rollerBearingRandomForestClassification$Type1Error
+rollerBearingRandomForestClassification$Type2Error
 #Retrain RF 
+numberOfAttributes<-15
 rollerBearingNormalDataAttributeImportance<-importance(randomForestClassification$RandomForest,type=1)
 varImpPlot(randomForestClassification$RandomForest)
 rollerBearingFeatureNames<-colnames(completeTestSet)[1:27]
 rollerBearingAttributeImportanceTable<-data.frame(Feature=rollerBearingFeatureNames,AccuracyDecrease=rollerBearingNormalDataAttributeImportance)
 rollerBearingAttributeImportanceTable<-rollerBearingAttributeImportanceTable[order(rollerBearingAttributeImportanceTable$MeanDecreaseAccuracy),]
-reducedTrainingSet<-trainingSet[,as.character(rollerBearingAttributeImportanceTable$Feature[1:15])]
-reducedTestSet<-completeTestSet[,as.character(rollerBearingAttributeImportanceTable$Feature[1:15])]
+reducedTrainingSet<-trainingSet[,as.character(rollerBearingAttributeImportanceTable$Feature[1:numberOfAttributes])]
+reducedTestSet<-completeTestSet[,as.character(rollerBearingAttributeImportanceTable$Feature[1:numberOfAttributes])]
 rollerBearingRandomForestClassificationWithReducedAttributes<-OneClassRandomForest(reducedTrainingSet,trainingSet[,28],reducedTestSet,completeTestSet[,28])
+rollerBearingRandomForestClassificationWithReducedAttributes$Confusion
+rollerBearingRandomForestClassificationWithReducedAttributes$Type1Error
+rollerBearingRandomForestClassificationWithReducedAttributes$Type2Error
