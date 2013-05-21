@@ -74,16 +74,16 @@ figure(1); clf;
 subplot(4,1,1), 
     plot(xScale,normalSegments(:,1)),
     title('First five revolutions of Rolling Element Bearing Data')
-    legend('Normal','Location','EastOutside');
+    ylabel('Normal');
 subplot(4,1,2), 
     plot(xScale,ballFaultSegments(:,1)),
-    legend('Ball Faults','Location','SouthWest');
+    ylabel('Ball fault');
 subplot(4,1,3), 
     plot(xScale,innerRacewayFaultSegments(:,1)),
-    legend('Inner Raceway Faults','Location','SouthWest');
+    ylabel('IR fault');
 subplot(4,1,4), 
     plot(xScale,outerRacewayFaultSegments(:,1));
-    legend('Outer Raceway Faults','Location','SouthWest');
+    ylabel('OR fault');
     %% Feature Extraction
     % Extracts Kurtosis (k),Mel Frequency Cepstrum Coefficients (c) and Multifractal
     % Dimensions (m) as 27-tupels in the format (c1...c13,m1...,m13,k) (3)
@@ -102,13 +102,12 @@ subplot(4,1,4),
     outerRacewayFaultFeatures=...
         ExtractRollerBearingFeatures( outerRacewayFaultSegments,sampleFrequency);
     %First outer raceway fault features
-    outerRacewayFaultFeatures(1:3,:)
-    
+    outerRacewayFaultFeatures(1,:)
     %ToDo: PCA to remove redundancies in dataset
     
     %% Training and test set generation 
     % Creates a target dataset with normal features for training and a
-    % datset with target and outlier samples for testing a Support Vector
+    % dataset with target and outlier samples for testing a Support Vector
     % Data Description (1)
     normalFeaturesDataSet=dataset(normalFeatures);
     ballFaultFeaturesDataSet=dataset(ballFaultFeatures);
@@ -143,11 +142,11 @@ subplot(4,1,4),
              outerRacewayFaultTestData];
    
 
-   %% SVDD Training
+   %% SVDD 
    % Uses the target data to calculate an SVD mapping with a rejection rate of 0.2 and an RBF-Kernel with Sigma=5 (4)     
    w = svdd( targetData,0.2,5);
    
-   %% Error evaluation
+  
    % Calculates false negative (rejected targets) and false positive
    % (accepted outliers) rates and plots a ROC curve (1)
    e = dd_error(testData,w);
@@ -158,7 +157,10 @@ subplot(4,1,4),
    %Roc
    figure(2); clf;
    plotroc(dd_roc(testData*w),'r');
+   %% 
 
+  
+   
    %% References
    %%
    % # PRTools4, A Matlab Toolbox for Pattern Recognition Version 4.1

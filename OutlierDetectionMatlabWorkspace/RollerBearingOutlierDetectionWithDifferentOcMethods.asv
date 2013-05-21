@@ -1,0 +1,94 @@
+%% Roller Bearing Outlier Detection with different One Class Classifiers
+%% Preparation
+clf;
+   %% SVDD
+   % Uses the target data to calculate an SVD mapping with a rejection rate of 0.2 and an RBF-Kernel with Sigma=5 (4)     
+   w = svdd( targetData,0.2,5);
+   % Calculates false negative (rejected targets) and false positive
+   % (accepted outliers) rates and plots a ROC curve (1)
+   e = dd_error(testData,w);
+   %False Negatives:
+   svddFalseNegatives = e(1)
+   %False Positives:
+   svddFalsePositives=e(2)
+   %Roc
+   h=plotroc(dd_roc(testData*w),'r');
+   H(1) = h(1);
+   %% K-Means
+      % Uses the target data to calculate an SVD mapping with a rejection rate of 0.2 and an RBF-Kernel with Sigma=5 (4)     
+   w = kmeans_dd(targetData,0.1,5);
+   % Calculates false negative (rejected targets) and false positive
+   % (accepted outliers) rates and plots a ROC curve (1)
+   e = dd_error(testData,w);
+   %False Negatives:
+    e(1)
+   %False Positives:
+   e(2)
+   %Roc
+   h=plotroc(dd_roc(testData*w),'r');
+   H(2) = h(1);
+    %% K-Centers
+      % Uses the target data to calculate an SVD mapping with a rejection rate of 0.2 and an RBF-Kernel with Sigma=5 (4)     
+   w = kmeans_dd(targetData,0.1,5);
+   % Calculates false negative (rejected targets) and false positive
+   % (accepted outliers) rates and plots a ROC curve (1)
+   e = dd_error(testData,w);
+   %False Negatives:
+   e(1)
+   %False Positives:
+   e(2)
+   %Roc
+   h=plotroc(dd_roc(testData*w),'r');
+   H(3) = h(1);
+    %% NN-d
+      % Uses the target data to calculate an SVD mapping with a rejection rate of 0.2 and an RBF-Kernel with Sigma=5 (4)     
+   w = NNdd(targetData,0.1);
+   % Calculates false negative (rejected targets) and false positive
+   % (accepted outliers) rates and plots a ROC curve (1)
+   e = dd_error(testData,w);
+   %False Negatives:
+   e(1)
+   %False Positives:
+   e(2)
+   %Roc
+   h=plotroc(dd_roc(testData*w),'r');
+   H(4) = h(1);
+    %% Parzen-dd
+      % Uses the target data to calculate an SVD mapping with a rejection rate of 0.2 and an RBF-Kernel with Sigma=5 (4)     
+   w = parzen_dd(targetData,0.1);
+   % Calculates false negative (rejected targets) and false positive
+   % (accepted outliers) rates and plots a ROC curve (1)
+   e = dd_error(testData,w);
+   %False Negatives:
+   e(1)
+   %False Positives:
+   e(2)
+   %Roc
+   h=plotroc(dd_roc(testData*w),'r');
+   H(5) = h(1);
+    %% SOM-dd
+      % Uses the target data to calculate an SVD mapping with a rejection rate of 0.2 and an RBF-Kernel with Sigma=5 (4)     
+   w = som_dd(targetData,0.1);
+   % Calculates false negative (rejected targets) and false positive
+   % (accepted outliers) rates and plots a ROC curve (1)
+   e = dd_error(testData,w);
+   %False Negatives:
+   e(1)
+   %False Positives:
+   e(2)
+   %Roc
+   h=plotroc(dd_roc(testData*w),'r');
+   H(6) = h(1);
+   %% Plot
+   legend(H,'SVDD','K-Means','K-Centers','NN-d','Parzen','SOM')
+   
+   %% References
+   %%
+   % # PRTools4, A Matlab Toolbox for Pattern Recognition Version 4.1
+   % (R.P.W. Duin,D.M.J. Tax et al.)
+   % # <http://csegroups.case.edu/bearingdatacenter/pages/welcome-case-western-reserve-university-bearing-data-center-website>
+   % # "Early Classification Of Bearing Faults Using Hidden Markov Models,Gaussian Mixture Models, Mel-Frequency Cepstral Coefficients and Fractals" (Marwala et al)
+   % # "Support Vector Data Description" (Tax,Duin) <http://mediamatica.ewi.tudelft.nl/sites/default/files/ML_SVDD_04.pdf>
+   
+
+  
