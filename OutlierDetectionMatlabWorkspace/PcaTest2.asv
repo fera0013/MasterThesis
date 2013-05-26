@@ -1,0 +1,5 @@
+load cities
+figure() 
+boxplot(ratings,'orientation','horizontal','labels',categories)
+[wcoeff,score,latent,tsquared,explained] = pca(ratings,...
+'VariableWeights','variance');

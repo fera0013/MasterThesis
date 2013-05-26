@@ -8,3 +8,5 @@ scatterd(Dataset);title('Adjust dataset');
 twoVectorTransform = pca(Dataset,1);
 transformedSet =DatasetAdjust*twoVectorTransform;
 scatterd(transformedSet);
+
+
