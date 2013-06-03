@@ -118,16 +118,16 @@ subplot(4,1,4),
            ballFaultTestData;...
            innerRacewayFaultTestData;...
            outerRacewayFaultTestData];
+       %Create training and test dataset with reduced features
+       reducedTrainingData=dataset(zscore(+targetTrainingData)* reducedPrincipalComponentsOfNormalData,getlabels(targetTrainingData));
+       reducedTestData=dataset(zscore(+testData)* reducedPrincipalComponentsOfNormalData,getlabels(testData));
        fractionOfRejectedTrainingData=0.1;
-       % SVD     
+       % SVDD
        w = svdd( targetData, fractionOfRejectedTrainingData,5);
-       %Error evaluation
        e = dd_error(testData,w);
-       %False Negatives:
        svddRejectedNormals =svddRejectedNormals+ e(1);
-       %False Positives:
        svddAcceptedOutliers =svddAcceptedOutliers+e(2);
-       % K-Means   
+       % K-MEANS  
        w = kmeans_dd(targetData, fractionOfRejectedTrainingData,5);
        e = dd_error(testData,w);
        kMeansRejectedNormals= kMeansRejectedNormals+e(1);
@@ -143,8 +143,8 @@ subplot(4,1,4),
        nddRejectedNormals= nddRejectedNormals+e(1);
        nddAcceptedOutliers=   nddAcceptedOutliers+e(2);
        % Parzen-dd
-       w = parzen_dd(targetData, fractionOfRejectedTrainingData);
-       e = dd_error(testData,w);
+       w = parzen_dd(reducedTrainingData, fractionOfRejectedTrainingData);
+       e = dd_error(reducedTestData,w);
        parzenWindowsRejectedNormals =   parzenWindowsRejectedNormals+e(1);
        parzenWindowsAcceptedOutliers=   parzenWindowsAcceptedOutliers+e(2);
        % SOM-dd

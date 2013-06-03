@@ -95,12 +95,12 @@ subplot(4,1,4),
    svddAcceptedOutliers=0; 
    kMeansRejectedNormals= 0;
    kMeansAcceptedOutliers= 0; 
-   kcenterAcceptedNormals= 0;
-   kcenterRejectedOutliers= 0;
-   nddAcceptedNormals= 0;
-   nddRejectedOutliers= 0;
-   parzenWindowsAcceptedNormals =0;
-   parzenWindowsRejectedOutliers= 0;
+   kcenterRejectedNormals= 0;
+   kcenterAcceptedOutliers= 0;
+   nddRejectedNormals= 0;
+   nddAcceptedOutliers= 0;
+   parzenWindowsRejectedNormals =0;
+   parzenWindowsAcceptedOutliers= 0;
    somRejectedNormals=0;
    somAcceptedOutliers=0;
    for i=0:numberOfIterations
@@ -118,6 +118,9 @@ subplot(4,1,4),
            ballFaultTestData;...
            innerRacewayFaultTestData;...
            outerRacewayFaultTestData];
+       %Create training and test dataset with reduced features
+       reducedTrainingData=dataset(zscore(+targetTrainingData),getlabels(targetTrainingData));
+       reducedTestData=dataset(zscore(+testData),getlabels(testData));
        fractionOfRejectedTrainingData=0.1;
        % SVD     
        w = svdd( targetData, fractionOfRejectedTrainingData,5);
@@ -135,36 +138,36 @@ subplot(4,1,4),
        % K-Centers
        w = kcenter_dd(targetData, fractionOfRejectedTrainingData,5);
        e = dd_error(testData,w);
-       kcenterAcceptedNormals= kcenterAcceptedNormals+e(1);
-       kcenterRejectedOutliers= kcenterRejectedOutliers+e(2);
+       kcenterRejectedNormals= kcenterRejectedNormals+e(1);
+       kcenterAcceptedOutliers= kcenterAcceptedOutliers+e(2);
        % NN-d
-       w = NNdd(targetData, fractionOfRejectedTrainingData);
+       w = nndd(targetData, fractionOfRejectedTrainingData);
        e = dd_error(testData,w);
-       nddAcceptedNormals= nddAcceptedNormals+e(1);
-       nddRejectedOutliers=   nddRejectedOutliers+e(2);
+       nddRejectedNormals= nddRejectedNormals+e(1);
+       nddAcceptedOutliers=   nddAcceptedOutliers+e(2);
        % Parzen-dd
        w = parzen_dd(targetData, fractionOfRejectedTrainingData);
        e = dd_error(testData,w);
-       parzenWindowsAcceptedNormals =   parzenWindowsAcceptedNormals+e(1);
-       parzenWindowsRejectedOutliers=   parzenWindowsRejectedOutliers+e(2);
+       parzenWindowsRejectedNormals =   parzenWindowsRejectedNormals+e(1);
+       parzenWindowsAcceptedOutliers=   parzenWindowsAcceptedOutliers+e(2);
        % SOM-dd
        w = som_dd(targetData, fractionOfRejectedTrainingData);
        e = dd_error(testData,w);
        somRejectedNormals=somRejectedNormals+e(1);
        somAcceptedOutliers= somAcceptedOutliers+e(2);
    end
-   svddRejectedNormals =svddRejectedNormals/numberOfIterations;
-   svddAcceptedOutliers=0; 
-   kMeansRejectedNormals= 0;
-   kMeansAcceptedOutliers= 0; 
-   kcenterAcceptedNormals= 0;
-   kcenterRejectedOutliers= 0;
-   nddAcceptedNormals= 0;
-   nddRejectedOutliers= 0;
-   parzenWindowsAcceptedNormals =0;
-   parzenWindowsRejectedOutliers= 0;
-   somRejectedNormals=0;
-   somAcceptedOutliers=0;
+   svddRejectedNormals =svddRejectedNormals/numberOfIterations
+   svddAcceptedOutliers=svddAcceptedOutliers/numberOfIterations
+   kMeansRejectedNormals=  kMeansRejectedNormals/numberOfIterations
+   kMeansAcceptedOutliers= kMeansAcceptedOutliers/numberOfIterations
+   kcenterRejectedNormals=  kcenterRejectedNormals/numberOfIterations
+   kcenterAcceptedOutliers=  kcenterAcceptedOutliers/numberOfIterations
+   nddRejectedNormals= nddRejectedNormals/numberOfIterations
+   nddAcceptedOutliers= nddRejectedOutliers/numberOfIterations
+   parzenWindowsRejectedNormals = parzenWindowsRejectedNormals/numberOfIterations
+   parzenWindowsAcceptedOutliers=  parzenWindowsAcceptedOutliers/numberOfIterations
+   somRejectedNormals= somRejectedNormals/numberOfIterations
+   somAcceptedOutliers= somAcceptedOutliers/numberOfIterations
    %% References
    %%
    % # PRTools4, A Matlab Toolbox for Pattern Recognition Version 4.1

@@ -1,89 +1,59 @@
 %% Support Vector Data Description (SVDD) of Roller Bearing time series
 % Detection of Outliers in Rolling Element Bearing Datasets using Support
 % Vector Data Description
-%% SVDD sample
-% Creates a banana-shaped one-class dataset and calculates three different
-% SVDD mappings with Radial Basis Functions with different Sigma values (1)
-a = gendatb([30 30]);
-% Setting of the second class as target class
-a = oc_set(a,'1');
-a = target_class(a);
-% Generation of test data
-b = oc_set(gendatb(200),'1');
-V = axis; axis(1.5*V);
-% Training of three SVDDs
-H=[0;0];
-fracrej = 0.2;
-figure(1); clf; hold on;
-s=scatterd(a);
-w1 = svdd(a,fracrej,2);
-h=plotc(w1,'k--');
-H(1)=s;
-H(2)=h;
-legend(H,'Target Data','SVDD with RBF, Sigma=2');
-hold off;
-figure(2); clf; hold on;
-s=scatterd(a);
-w2 = svdd(a,fracrej,3);
-h=plotc(w2,'k--');
-H(1)=s;
-H(2)=h;
-legend(H,'Target Data','SVDD with RBF, Sigma=3');
-hold off;
-figure(3); clf; hold on;
-s=scatterd(a);
-w3 = svdd(a,fracrej,5);
-h=plotc(w3,'k--');
-H(1)=s;
-H(2)=h;
-legend(H,'Target Data','SVDD with RBF, Sigma=5');
-axis equal;
-axis image;
 %% Preprocessing 
 % Partitions Roller Bearing time signals into segments of 5 revolutions (2,3)
 numberOfRevolutionsPerSegment=5;
 rpm=1796;
 sampleFrequency=48000;
 normalSegments=SegmentRotationTimeSignal(...
-    normalRawData1797rpm48k,...
+    rollerBearingNormalData,...
     rpm,...
     sampleFrequency,...
     numberOfRevolutionsPerSegment); 
 ballFaultSegments=SegmentRotationTimeSignal(...
-    ballFaultRawData1797rpm48k,...
+    rollerBearingBallFaultData,...
     rpm,...
     sampleFrequency,...
     numberOfRevolutionsPerSegment); 
 innerRacewayFaultSegments=SegmentRotationTimeSignal(...
-    innerRacewayFaultRawData1797rpm48k,...
+    rollerBearingInnerRacewayFaultData,...
      rpm,...
      sampleFrequency,...
      numberOfRevolutionsPerSegment); 
  outerRacewayFaultSegments=SegmentRotationTimeSignal(...
-    outerRacewayRawData1797rpm48k,...
+    rollerBearingOuterRacewayFaultData,...
      rpm,...
      sampleFrequency,...
      numberOfRevolutionsPerSegment);
- 
  numberOfDataPoints = size(normalSegments,1);
  deltaX = numberOfRevolutionsPerSegment/numberOfDataPoints;
  xScale = (0+deltaX):deltaX:numberOfRevolutionsPerSegment;
- 
 %Plots the first segment of each dataset
+firstNormalSegment=normalSegments(:,1);
+firstBallFaultSegment=ballFaultSegments(:,1);
+firstInnerRacewayFaultSegment = innerRacewayFaultSegments(:,1);
+firstOuterRacewayFaultSegment=outerRacewayFaultSegments(:,1);
+minYValue=min(min(horzcat(firstNormalSegment,firstBallFaultSegment,firstInnerRacewayFaultSegment,firstOuterRacewayFaultSegment)));
+maxYValue=max(max(horzcat(firstNormalSegment,firstBallFaultSegment,firstInnerRacewayFaultSegment,firstOuterRacewayFaultSegment)));
 figure(1); clf;
 subplot(4,1,1), 
-    plot(xScale,normalSegments(:,1)),
+    plot(xScale,firstNormalSegment),
     title('First five revolutions of Rolling Element Bearing Data')
     ylabel('Normal');
+    ylim([minYValue,maxYValue]);
 subplot(4,1,2), 
-    plot(xScale,ballFaultSegments(:,1)),
+    plot(xScale,firstBallFaultSegment),
     ylabel('Ball fault');
+    ylim([minYValue,maxYValue]);
 subplot(4,1,3), 
-    plot(xScale,innerRacewayFaultSegments(:,1)),
+    plot(xScale,firstInnerRacewayFaultSegment),
     ylabel('IR fault');
+    ylim([minYValue,maxYValue]);
 subplot(4,1,4), 
-    plot(xScale,outerRacewayFaultSegments(:,1));
+    plot(xScale,firstOuterRacewayFaultSegment);
     ylabel('OR fault');
+    ylim([minYValue,maxYValue]);
     %% Feature Extraction
     % Extracts Kurtosis (k),Mel Frequency Cepstrum Coefficients (c) and Multifractal
     % Dimensions (m) as 27-tupels in the format (c1...c13,m1...,m13,k) (3)
