@@ -28,11 +28,14 @@ end
 
 if ~ismapping(fracrej)           %training
 
-	x = target_class(x);     % only use the target class
+	X = target_class(x);     % only use the target class
 	[nrx,dim] = size(x);
-
+    Y = [];
+    X=getdata(X);
+    labels=repmat(1,1,size(X,1));
     extra_options.proximity=1;
-    w = classRF_train(X_new,Y_new,100,0,extra_options);
+    model = classRF_train(X,Y,100,0,extra_options);
+    prototype = classCenter(X,labels',model.proximity);
 	% Now, all the work is being done by som.m:
 	w = getdata(w);
 	% Now map the training data:

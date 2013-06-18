@@ -26,14 +26,20 @@ load data/twonorm
 X = inputs';
 Y = outputs;
 
+% 
+X = targetRawTrainingData;
+Y = repmat(1,size(X,1),1);
 [N D] =size(X);
 
 X_new = X;
 Y_new = []; %lose labels for Y before sending it to the program
 
-extra_options.do_trace = 1; %(Default = 0)
-extra_options.proximity=1;
-model = classRF_train(X_new,Y_new,100,0,extra_options);
+extra_options.do_trace = 0; %(Default = 0)
+model = classRF_train(X_new,Y_new,1000,0,extra_options);
+
+
+xdat = classCenter(X,Y,model.proximity)
+%xdat2 = classCenter_R(X,Y,model.proximity)
 
 %copied this from MDSplot.R from the randomForest's R source
 %basically use cmdscale command for multidimensional scaling and
@@ -41,3 +47,4 @@ model = classRF_train(X_new,Y_new,100,0,extra_options);
 rf_mds = cmdscale(1-model.proximity);
 plot(rf_mds(Y==1,1),rf_mds(Y==1,2),'*k');hold on
 plot(rf_mds(Y==-1,1),rf_mds(Y==-1,2),'*r')
+

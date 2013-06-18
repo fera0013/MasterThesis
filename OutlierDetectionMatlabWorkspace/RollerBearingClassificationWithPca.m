@@ -122,6 +122,8 @@ subplot(4,1,4),
        reducedTrainingData=dataset(zscore(+targetTrainingData)* reducedPrincipalComponentsOfNormalData,getlabels(targetTrainingData));
        reducedTestData=dataset(zscore(+testData)* reducedPrincipalComponentsOfNormalData,getlabels(testData));
        fractionOfRejectedTrainingData=0.1;
+       % RandomForest
+       w = randomforest_dd(targetTrainingData, fractionOfRejectedTrainingData)
        % SVDD
        w = svdd(  reducedTrainingData, fractionOfRejectedTrainingData,5);
        e = dd_error(reducedTestData,w);
