@@ -6,57 +6,37 @@
 numberOfRevolutionsPerSegment=5;
 rpm=1796;
 sampleFrequency=48000;
-normalSegments=SegmentRotationTimeSignal(...
+normalSegments=SplitSignal(...
     rollerBearingNormalData,...
     rpm,...
     sampleFrequency,...
     numberOfRevolutionsPerSegment); 
-ballFaultSegments=SegmentRotationTimeSignal(...
+ballFaultSegments=SplitSignal(...
     rollerBearingBallFaultData,...
     rpm,...
     sampleFrequency,...
     numberOfRevolutionsPerSegment); 
-innerRacewayFaultSegments=SegmentRotationTimeSignal(...
+innerRacewayFaultSegments=SplitSignal(...
     rollerBearingInnerRacewayFaultData,...
      rpm,...
      sampleFrequency,...
      numberOfRevolutionsPerSegment); 
- outerRacewayFaultSegments=SegmentRotationTimeSignal(...
+ outerRacewayFaultSegments=SplitSignal(...
     rollerBearingOuterRacewayFaultData,...
      rpm,...
      sampleFrequency,...
      numberOfRevolutionsPerSegment);
- 
- numberOfDataPoints = size(normalSegments,1);
- deltaX = numberOfRevolutionsPerSegment/numberOfDataPoints;
- xScale = (0+deltaX):deltaX:numberOfRevolutionsPerSegment;
- 
-%Plots the first segment of each dataset
-figure(1); clf;
-subplot(4,1,1), 
-    plot(xScale,normalSegments(:,1)),
-    title('First five revolutions of Rolling Element Bearing Data')
-    ylabel('Normal');
-subplot(4,1,2), 
-    plot(xScale,ballFaultSegments(:,1)),
-    ylabel('Ball fault');
-subplot(4,1,3), 
-    plot(xScale,innerRacewayFaultSegments(:,1)),
-    ylabel('IR fault');
-subplot(4,1,4), 
-    plot(xScale,outerRacewayFaultSegments(:,1));
-    ylabel('OR fault');
     %% Feature Extraction
     % Extracts Kurtosis (k),Mel Frequency Cepstrum Coefficients (c) and Multifractal
     % Dimensions (m) as 27-tupels in the format (c1...c13,m1...,m13,k) (3)
     normalFeatures = ...
-        ExtractRollerBearingFeatures(normalSegments, sampleFrequency);
+        ExtractFeatures(normalSegments, sampleFrequency);
     ballFaultFeatures =...
-        ExtractRollerBearingFeatures(ballFaultSegments,sampleFrequency);
+        ExtractFeatures(ballFaultSegments,sampleFrequency);
     innerRacewayFaultFeatures =...
-        ExtractRollerBearingFeatures(innerRacewayFaultSegments,sampleFrequency);
+        ExtractFeatures(innerRacewayFaultSegments,sampleFrequency);
     outerRacewayFaultFeatures=...
-        ExtractRollerBearingFeatures( outerRacewayFaultSegments,sampleFrequency);
+        ExtractFeatures( outerRacewayFaultSegments,sampleFrequency);
     %% Feature reduction with PCA
     numberOfPrincipalComponents=27;
     [principalComponentsOfNormalData,transformedNormalData]=princomp(zscore(normalFeatures));
@@ -123,35 +103,35 @@ subplot(4,1,4),
        reducedTestData=dataset(zscore(+testData)* reducedPrincipalComponentsOfNormalData,getlabels(testData));
        fractionOfRejectedTrainingData=0.1;
        % RandomForest
-       w = randomforest_dd(targetTrainingData, fractionOfRejectedTrainingData)
+       %w = randomforest_dd(targetTrainingData, fractionOfRejectedTrainingData)
        % SVDD
-       w = svdd(  reducedTrainingData, fractionOfRejectedTrainingData,5);
-       e = dd_error(reducedTestData,w);
+       w = svdd(  targetTrainingData, fractionOfRejectedTrainingData,5);
+       e = dd_error(  testData,w);
        svddRejectedNormals =svddRejectedNormals+ e(1);
        svddAcceptedOutliers =svddAcceptedOutliers+e(2);
        % K-MEANS  
-       w = kmeans_dd( reducedTrainingData, fractionOfRejectedTrainingData,5);
-       e = dd_error(reducedTestData,w);
+       w = kmeans_dd( targetTrainingData, fractionOfRejectedTrainingData,5);
+       e = dd_error(  testData,w);
        kMeansRejectedNormals= kMeansRejectedNormals+e(1);
        kMeansAcceptedOutliers= kMeansAcceptedOutliers+e(2);
        % K-Centers
-       w = kcenter_dd( reducedTrainingData, fractionOfRejectedTrainingData,5);
-       e = dd_error(reducedTestData,w);
+       w = kcenter_dd( targetTrainingData, fractionOfRejectedTrainingData,5);
+       e = dd_error(  testData,w);
        kcenterRejectedNormals= kcenterRejectedNormals+e(1);
        kcenterAcceptedOutliers= kcenterAcceptedOutliers+e(2);
        % NN-d
-       w = nndd( reducedTrainingData, fractionOfRejectedTrainingData);
-       e = dd_error(reducedTestData,w);
+       w = nndd( targetTrainingData, fractionOfRejectedTrainingData);
+       e = dd_error(  testData,w);
        nddRejectedNormals= nddRejectedNormals+e(1);
        nddAcceptedOutliers=   nddAcceptedOutliers+e(2);
        % Parzen-dd
-       w = parzen_dd(reducedTrainingData, fractionOfRejectedTrainingData);
-       e = dd_error(reducedTestData,w);
+       w = parzen_dd(targetTrainingData, fractionOfRejectedTrainingData);
+       e = dd_error(  testData,w);
        parzenWindowsRejectedNormals =   parzenWindowsRejectedNormals+e(1);
        parzenWindowsAcceptedOutliers=   parzenWindowsAcceptedOutliers+e(2);
        % SOM-dd
-       w = som_dd( reducedTrainingData, fractionOfRejectedTrainingData);
-       e = dd_error(reducedTestData,w);
+       w = som_dd( targetTrainingData, fractionOfRejectedTrainingData);
+       e = dd_error(  testData,w);
        somRejectedNormals=somRejectedNormals+e(1);
        somAcceptedOutliers= somAcceptedOutliers+e(2);
    end
