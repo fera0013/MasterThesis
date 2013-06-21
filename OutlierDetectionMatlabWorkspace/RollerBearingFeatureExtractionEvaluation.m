@@ -47,20 +47,48 @@ normalLine='-';
 ballFaultLine='-o';
 innerRacewayFaultLine=':s';
 outerRacewayFaultLine='--+';
+%% Plot Mel Frequency Cepstral Coefficients
+normalMfccFeatures = normalFeatures(1,1:13);
+ballFaultMfccFeatures =  ballFaultFeatures(1,1:13);
+innerRacewayFaultMfccFeatures=innerRacewayFaultFeatures(1,1:13);
+outerRacewayFaultMfccFeatures=outerRacewayFaultFeatures(1,1:13);
+minYValue=min(min(horzcat(normalMfccFeatures,ballFaultMfccFeatures,innerRacewayFaultMfccFeatures,outerRacewayFaultMfccFeatures)));
+maxYValue=max(max(horzcat(normalMfccFeatures,ballFaultMfccFeatures,innerRacewayFaultMfccFeatures,outerRacewayFaultMfccFeatures)));
+figure(1); clf;
+subplot(4,1,1), 
+    bar(normalMfccFeatures),
+    title('First 13 Mel Frequency Cepstral Coefficients')
+    ylabel('Normal');
+    ylim([minYValue,maxYValue]);
+subplot(4,1,2), 
+    bar(ballFaultMfccFeatures),
+    ylabel('Ball fault');
+    ylim([minYValue,maxYValue]);
+subplot(4,1,3), 
+    bar(innerRacewayFaultMfccFeatures),
+    ylabel('IR fault');
+    ylim([minYValue,maxYValue]);
+subplot(4,1,4), 
+    bar(outerRacewayFaultMfccFeatures);
+    ylabel('OR fault');
+    ylim([minYValue,maxYValue]);
+%% Plot Fractal Dimensions
+figure(2); clf;
 plot(x,normalFeatures(1:15,15),normalLine,...
     x,ballFaultFeatures(1:15,15),ballFaultLine,...
     x,outerRacewayFaultFeatures(1:15,15),outerRacewayFaultLine,...
     x,innerRacewayFaultFeatures(1:15,15),innerRacewayFaultLine)
+title('First 15 Higuchi Fractal Dimensions with k=6')
 ylim([1.5,2.4]);
 ylabel('Fractal Dimension')
 legend('normal','Ball fault','Outer raceway Fault','Inner raceway fault');
-   %% References
-   %%
-   % # PRTools4, A Matlab Toolbox for Pattern Recognition Version 4.1
-   % (R.P.W. Duin,D.M.J. Tax et al.)
-   % # <http://csegroups.case.edu/bearingdatacenter/pages/welcome-case-western-reserve-university-bearing-data-center-website>
-   % # "Early Classification Of Bearing Faults Using Hidden Markov Models,Gaussian Mixture Models, Mel-Frequency Cepstral Coefficients and Fractals" (Marwala et al)
-   % # "Support Vector Data Description" (Tax,Duin) <http://mediamatica.ewi.tudelft.nl/sites/default/files/ML_SVDD_04.pdf>
+%% References
+%%
+% # PRTools4, A Matlab Toolbox for Pattern Recognition Version 4.1
+% (R.P.W. Duin,D.M.J. Tax et al.)
+% # <http://csegroups.case.edu/bearingdatacenter/pages/welcome-case-western-reserve-university-bearing-data-center-website>
+% # "Early Classification Of Bearing Faults Using Hidden Markov Models,Gaussian Mixture Models, Mel-Frequency Cepstral Coefficients and Fractals" (Marwala et al)
+% # "Support Vector Data Description" (Tax,Duin) <http://mediamatica.ewi.tudelft.nl/sites/default/files/ML_SVDD_04.pdf>
    
 
   
