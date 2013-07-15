@@ -1,22 +1,18 @@
-%SOM_DD Self-Organizing Map data description
+%RandomForest_DD Random Forest data description
 %
-%           W =  SOM_DD(X,FRACREJ,K)
+%     [W,proximity,model] = randomForest_dd(x,fracrej)
 %
-% Train a 2D SOM on dataset X. In K the size of the map is defined. The
-% map can maximally be 2D. When K contains just a single value, it is
-% assumed that a 1D map should be trained.
-%
-% For further features of SOM_DD, see som.m (the same parameters
-% NRRUNS, ETA and H can be added).
-%
-% Default: K=[5 5]
-%
-% See also: pca_dd, kmeans_dd, som
-
-% Copyright: D.M.J. Tax, D.M.J.Tax@prtools.org
-% Faculty EWI, Delft University of Technology
-% P.O. Box 5031, 2600 GA Delft, The Netherlands
-function W = randomForest_dd(x,fracrej)
+% - Trains a random forest model on the target training data X
+% - Calculates the target class prototype
+% - Sets a threshold based on the Euclidean Distances between training
+%   objects and prototype
+% - Classifies test objects with Euclidean Distance to prototype below the
+%   threshold value as target, otherwise as outliers
+% Copyright:
+% Ralph Fehrer
+% University of Freiburg, Germany
+% ralphfehrer@web.de
+function [W,model] = randomForest_dd(x,fracrej)
 if nargin < 2 
     fracrej = 0.05; 
 end
@@ -33,35 +29,43 @@ if ~ismapping(fracrej)           %training
     Y = [];
     X=getdata(X);
     labels=repmat(1,1,size(X,1));
+    %Switch on extra options
     extra_options.proximity=1;
+    extra_options.importance = 1;
+    extra_options.proximity = 1;
+    %Train random forest
     model = classRF_train(X,Y,100,0,extra_options);
+    %Calculate class prototype
     prototype = classCenter(X,labels,model.proximity);
-	% Now, all the work is being done by som.m:
-	w = getdata(w);
-	% Now map the training data:
-	mD = min(sqeucldistm(+x,w.neurons),[],2);
-	thresh = dd_threshold(mD,1-fracrej);
-
-	% And save all useful data:
-	V.threshold = thresh;  % a threshold should always be defined
-	V.k = w.k;  %(only for plotting...)
-	V.neurons = w.neurons;
-	W = mapping(mfilename,'trained',V,str2mat('target','outlier'),dim,2);
-	W = setname(W,'Self-organising Map data description');
+    %Calculate euclidean distances between training objects and prototype
+    mD = sqeucldistm(+x, prototype);
+    %Calculate threshold
+	W.threshold = dd_threshold(mD,1-fracrej);
+    W.prototype=prototype;
+    %Create mapping
+	W = mapping(mfilename,'trained',W,str2mat('target','outlier'),dim,2);
+	W = setname(W,'Random Forest data description');
 else
-    
-	W = getdata(fracrej); %unpack
+    %unpack
+	W = getdata(fracrej); 
 	m = size(x,1); 
 
-	% compute the distance to the nearest neuron in the map:
-	mD = min(sqeucldistm(+x,W.neurons),[],2);
+	% compute the distances netween the test objects and the normal class
+	% prototype
+	mD = sqeucldistm(+x,W.prototype);
 	newout = [mD repmat(W.threshold,m,1)];
-
-	% Store the distance as output:
+	% Store the distance as output
 	W = setdat(x,-newout,fracrej);
 	W = setfeatdom(W,{[-inf 0; -inf 0] [-inf 0; -inf 0]});
 end
 
 return
-
+%References:
+%- DDtools, the Data Description Toolbox for Matlab  V 1.9.1
+%  Tax, D.M.J.,2012
+%  Delft University of Technology
+%  http://prlab.tudelft.nl/david-tax/dd_tools.html
+%- Classification and Regression by randomForest-matlab,
+%  Abhishek Jaiantilal, 2013
+%  http://code.google.com/p/randomforest-matlab
 

@@ -1,0 +1,173 @@
+rfddRejectedNormals =
+
+    0.1100
+
+
+rfddAcceptedOutliers =
+
+     0
+
+
+rfddAverageTrainingRuntime =
+
+    0.9522
+
+
+rfddAverageTestingRuntime =
+
+    0.0050
+
+
+rfddAccuracy =
+
+    0.9450
+
+
+svddRejectedNormals =
+
+    0.3400
+
+
+svddAcceptedOutliers =
+
+     0
+
+
+svddAverageTrainingRuntime =
+
+   24.3736
+
+
+svddAverageTestingRuntime =
+
+    0.0110
+
+
+svddAccuracy =
+
+    0.8300
+
+
+kMeansRejectedNormals =
+
+    0.1522
+
+
+kMeansAcceptedOutliers =
+
+    0.0022
+
+
+kMeansAverageTrainingRuntime =
+
+    0.0224
+
+
+kMeansAverageTestingRuntime =
+
+    0.0083
+
+
+kMeansAccuracy =
+
+    0.9228
+
+
+kcenterRejectedNormals =
+
+    0.1278
+
+
+kcenterAcceptedOutliers =
+
+    0.0100
+
+
+kcenterAverageTrainingRuntime =
+
+    0.4895
+
+
+kcenterAverageTestingRuntime =
+
+    0.5129
+
+
+kcenterAccuracy =
+
+    0.9311
+
+
+nddRejectedNormals =
+
+    0.1367
+
+
+nddAcceptedOutliers =
+
+    0.0256
+
+
+nddAverageTrainingRuntime =
+
+    0.5689
+
+
+nddAverageTestingRuntime =
+
+    0.0164
+
+
+nddAccuracy =
+
+    0.9189
+
+
+parzenWindowsRejectedNormals =
+
+    0.9467
+
+
+parzenWindowsAcceptedOutliers =
+
+     0
+
+
+parzenWindowsAverageTrainingRuntime =
+
+    0.2678
+
+
+parzenWindowsAverageTestingRuntime =
+
+    0.0370
+
+
+parzenWindowsAccuracy =
+
+    0.5267
+
+
+somRejectedNormals =
+
+    0.1833
+
+
+somAcceptedOutliers =
+
+    0.0011
+
+
+somAverageTrainingRuntime =
+
+  172.6887
+
+
+somAverageTestingRuntime =
+
+    0.0060
+
+
+somAccuracy =
+
+    0.9078

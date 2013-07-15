@@ -1,0 +1,48 @@
+%% Support Vector Data Description (SVDD) of Roller Bearing time series
+% Detection of Outliers in Rolling Element Bearing Datasets using Support
+% Vector Data Description
+ %% Definition of performance measures
+ rfddRejectedNormals =0;
+ rfddAcceptedOutliers=0; 
+ rfddAverageTrainingRuntime =0;
+ rfddAverageTestingRuntime =0;
+ %% Iterative training and testing
+ numberOfIterations=1;
+ for i=1:numberOfIterations
+     %Create a test dataset with 50 random samples drawn from each dataset
+     numberOfTestSamples=100;
+     [targetTestData,targetTrainingData,normalTestDataIndices,normalTrainingDataIndices]=...
+         gendat(targetData, numberOfTestSamples);
+     [ballFaultTestData,unused,ballFaultTestDataIndices,unused2]=...
+         gendat(ballFaultOutliers, numberOfTestSamples);
+     [innerRacewayFaultTestData,unused,innerRacewayFaultTestDataIndices,unused2]=...
+         gendat(innerRacewayFaultOutliers,numberOfTestSamples);
+     [outerRacewayFaultTestData,unused,outerRacewayFaultTestDataIndices,unused2]=...
+         gendat(outerRacewayFaultOutliers,numberOfTestSamples);  
+     testData=[targetTestData;...
+         ballFaultTestData;...
+         innerRacewayFaultTestData;...
+         outerRacewayFaultTestData];
+     fractionOfRejectedTrainingData=0;
+     % RandomForest
+     w = randomforest_dd(targetTrainingData, fractionOfRejectedTrainingData);
+     e = dd_error(  testData,w);
+     %fractionOfRejectedTrainingData
+ end
+ %% Calculate performance measures
+ % Creates a target dataset with normal features for training and a
+ % dataset with target and outlier samples for testing 
+ rfddRejectedNormals =svddRejectedNormals/numberOfIterations
+ rfddAcceptedOutliers=svddAcceptedOutliers/numberOfIterations
+ rfddAverageTrainingRuntime=svddAverageTrainingRuntime/numberOfIterations
+ rfddAverageTestingRuntime=svddAverageTestingRuntime/numberOfIterations
+ %% References
+ %%
+ % # PRTools4, A Matlab Toolbox for Pattern Recognition Version 4.1
+ % (R.P.W. Duin,D.M.J. Tax et al.)
+ % # <http://csegroups.case.edu/bearingdatacenter/pages/welcome-case-western-reserve-university-bearing-data-center-website>
+ % # "Early Classification Of Bearing Faults Using Hidden Markov Models,Gaussian Mixture Models, Mel-Frequency Cepstral Coefficients and Fractals" (Marwala et al)
+ % # "Support Vector Data Description" (Tax,Duin) <http://mediamatica.ewi.tudelft.nl/sites/default/files/ML_SVDD_04.pdf>
+   
+
+  

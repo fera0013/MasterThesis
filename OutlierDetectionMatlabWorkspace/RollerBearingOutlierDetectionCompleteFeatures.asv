@@ -1,0 +1,232 @@
+%% Support Vector Data Description (SVDD) of Roller Bearing time series
+% Detection of Outliers in Rolling Element Bearing Datasets using Support
+% Vector Data Description
+%% Preprocessing 
+% Partitions Roller Bearing time signals into segments of 5 revolutions (2,3)
+% numberOfRevolutionsPerSegment=5;
+% rpm=1796;
+% sampleFrequency=48000;
+% normalSegments=SplitSignal(...
+%     rollerBearingNormalData,...
+%     rpm,...
+%     sampleFrequency,...
+%     numberOfRevolutionsPerSegment); 
+% ballFaultSegments=SplitSignal(...
+%     rollerBearingBallFaultData,...
+%     rpm,...
+%     sampleFrequency,...
+%     numberOfRevolutionsPerSegment); 
+% innerRacewayFaultSegments=SplitSignal(...
+%     rollerBearingInnerRacewayFaultData,...
+%      rpm,...
+%      sampleFrequency,...
+%      numberOfRevolutionsPerSegment); 
+%  outerRacewayFaultSegments=SplitSignal(...
+%     rollerBearingOuterRacewayFaultData,...
+%      rpm,...
+%      sampleFrequency,...
+%      numberOfRevolutionsPerSegment);
+%   %% Feature Extraction
+%   % Extracts Kurtosis (k),Mel Frequency Cepstrum Coefficients (c) and Multifractal
+%   % Dimensions (m) as 27-tupels in the format (c1...c13,m1...,m13,k) (3)
+%   normalFeatures = ...
+%       ExtractFeatures(normalSegments, sampleFrequency);
+%   ballFaultFeatures =...
+%       ExtractFeatures(ballFaultSegments,sampleFrequency);
+%   innerRacewayFaultFeatures =...
+%       ExtractFeatures(innerRacewayFaultSegments,sampleFrequency);
+%   outerRacewayFaultFeatures=...
+%       ExtractFeatures( outerRacewayFaultSegments,sampleFrequency);
+%   %% Data set construction
+%   normalFeaturesDataSet=dataset(normalFeatures);
+%   ballFaultFeaturesDataSet=dataset(ballFaultFeatures);
+%   innerRacewayFaultFeaturesDataset=dataset( innerRacewayFaultFeatures );
+%   outerRacewayFaultFeaturesDataset=dataset(  outerRacewayFaultFeatures);
+%   %Creates a target data training set with normal features
+%   %Put away normal data for testing
+%   targetData =...
+%       gendatoc(normalFeaturesDataSet);
+%   %Creates an outlier dataset with ball fault features
+%   ballFaultOutliers =...
+%       gendatoc([],  ballFaultFeaturesDataSet);
+%   %Creates an outlier dataset with inner raceway fault features
+%   innerRacewayFaultOutliers=...
+%       gendatoc([],  innerRacewayFaultFeaturesDataset);
+%   %Creates an outlier dataset with outer raceway fault features
+%   outerRacewayFaultOutliers=...
+%       gendatoc([],  outerRacewayFaultFeaturesDataset);
+ %% Definition of performance measures
+ rfddRejectedNormals =0;
+ rfddAcceptedOutliers=0; 
+ rfddTrainingRuntime =0;
+ rfddTestingRuntime =0;
+ svddRejectedNormals =0;
+ svddAcceptedOutliers=0; 
+ svddTrainingRuntime =0;
+ svddTestingRuntime =0;
+ kMeansRejectedNormals= 0;
+ kMeansAcceptedOutliers= 0; 
+ kMeansTrainingRuntime= 0; 
+ kMeansTestingRuntime= 0;
+ kcenterRejectedNormals= 0;
+ kcenterAcceptedOutliers= 0;
+ kcenterTrainingRuntime= 0;
+ kcenterTestingRuntime= 0;
+ nddRejectedNormals= 0;
+ nddAcceptedOutliers= 0;
+ nddTrainingRuntime= 0;
+ nddTestingRuntime= 0;
+ parzenWindowsRejectedNormals =0;
+ parzenWindowsAcceptedOutliers= 0;
+ parzenWindowsTrainingRuntime=0;
+ parzenWindowsTestingRuntime=0;
+ somRejectedNormals=0;
+ somAcceptedOutliers=0;
+ somTrainingRuntime=0;
+ somTestingRuntime=0;
+ %% Iterative training and testing
+ numberOfIterations=10;
+ for i=1:numberOfIterations
+     %Create a test dataset with 50 random samples drawn from each dataset
+     numberOfTestSamplesPerClass=90; %Should be divisible by 3 for a balanced test set
+     %Sample target test data and target training data
+     [targetTestData,trainingSet]=...
+         gendat(targetData, numberOfTestSamplesPerClass);
+     %Sample ball fault test data
+     [ballFaultTestData]=...
+         gendat(ballFaultOutliers, numberOfTestSamplesPerClass/3);
+     %Sample inner Raceway test data
+     [innerRacewayFaultTestData]=...
+         gendat(innerRacewayFaultOutliers,numberOfTestSamplesPerClass/3);
+     %Sample outer raceway test data
+     [outerRacewayFaultTestData]=...
+         gendat(outerRacewayFaultOutliers,numberOfTestSamplesPerClass/3);  
+     %Create test set
+     testSet=[targetTestData;...
+         ballFaultTestData;...
+         innerRacewayFaultTestData;...
+         outerRacewayFaultTestData];
+     fractionOfRejectedTrainingData=0.1;
+     % Train and test classifiers
+     % RandomForest
+     tic;
+     [w,model] = randomforest_dd(trainingSet, fractionOfRejectedTrainingData);
+     rfddTrainingRuntime=rfddTrainingRuntime+toc;
+     tic;
+     e = dd_error(  testSet,w);
+     rfddTestingRuntime=rfddTestingRuntime+toc;
+     rfddRejectedNormals =rfddRejectedNormals+ e(1);
+     rfddAcceptedOutliers =rfddAcceptedOutliers+e(2);
+     % SVDD
+     tic;
+     w = svdd(  trainingSet, fractionOfRejectedTrainingData,6);
+     svddTrainingRuntime=svddTrainingRuntime+toc;
+     tic;
+     e = dd_error(  testSet,w);
+     svddTestingRuntime=svddTestingRuntime+toc;
+     svddRejectedNormals =svddRejectedNormals+ e(1);
+     svddAcceptedOutliers =svddAcceptedOutliers+e(2);
+     % K-MEANS  
+     tic;
+     w = kmeans_dd( trainingSet, fractionOfRejectedTrainingData,5);
+     kMeansTrainingRuntime = kMeansTrainingRuntime+toc;
+     tic;
+     e = dd_error(  testSet,w);
+     kMeansTestingRuntime = kMeansTestingRuntime+toc;
+     kMeansRejectedNormals= kMeansRejectedNormals+e(1);
+     kMeansAcceptedOutliers= kMeansAcceptedOutliers+e(2);
+     % K-Centers
+     tic;
+     w = kcenter_dd( trainingSet, fractionOfRejectedTrainingData,5);
+     kcenterTrainingRuntime=kcenterTrainingRuntime+toc;
+     e = dd_error(  testSet,w);
+     kcenterTestingRuntime=kcenterTestingRuntime+toc;
+     kcenterRejectedNormals= kcenterRejectedNormals+e(1);
+     kcenterAcceptedOutliers= kcenterAcceptedOutliers+e(2);
+     % NN-d
+     tic;
+     w = nndd( trainingSet, fractionOfRejectedTrainingData);
+     nddTrainingRuntime= nddTrainingRuntime+toc;
+     tic;
+     e = dd_error(  testSet,w);
+     nddTestingRuntime=nddTestingRuntime+toc;
+     nddRejectedNormals= nddRejectedNormals+e(1);
+     nddAcceptedOutliers=   nddAcceptedOutliers+e(2);
+     % Parzen-dd
+     tic;
+     w = parzen_dd(trainingSet, fractionOfRejectedTrainingData);
+     parzenWindowsTrainingRuntime=parzenWindowsTrainingRuntime+toc;
+     tic;
+     e = dd_error(  testSet,w);
+     parzenWindowsTestingRuntime=parzenWindowsTestingRuntime+toc;
+     parzenWindowsRejectedNormals =   parzenWindowsRejectedNormals+e(1);
+     parzenWindowsAcceptedOutliers=   parzenWindowsAcceptedOutliers+e(2);
+     % SOM-dd
+     tic;
+     w = som_dd( trainingSet, fractionOfRejectedTrainingData);
+     somTrainingRuntime= somTrainingRuntime+toc;
+     tic;
+     e = dd_error(  testSet,w);
+     somTestingRuntime= somTestingRuntime+toc;
+     somRejectedNormals=somRejectedNormals+e(1);
+     somAcceptedOutliers= somAcceptedOutliers+e(2);
+ end
+ %% Evaluate classifiers 
+ rfddRejectedNormals =rfddRejectedNormals/numberOfIterations
+ rfddAcceptedOutliers=rfddAcceptedOutliers/numberOfIterations
+ rfddTrainingRuntime=rfddTrainingRuntime/numberOfIterations
+ rfddTestingRuntime=rfddTestingRuntime/numberOfIterations
+ rfddAccuracy=CalculateAccuracy(rfddRejectedNormals,rfddAcceptedOutliers,testSet)
+ svddRejectedNormals =svddRejectedNormals/numberOfIterations
+ svddAcceptedOutliers=svddAcceptedOutliers/numberOfIterations
+ svddTrainingRuntime=svddTrainingRuntime/numberOfIterations
+ svddTestingRuntime=svddTestingRuntime/numberOfIterations
+ svddAccuracy = CalculateAccuracy(svddRejectedNormals,svddAcceptedOutliers,testSet)
+ kMeansRejectedNormals=  kMeansRejectedNormals/numberOfIterations
+ kMeansAcceptedOutliers= kMeansAcceptedOutliers/numberOfIterations
+ kMeansTrainingRuntime= kMeansTrainingRuntime/numberOfIterations
+ kMeansTestingRuntime= kMeansTestingRuntime/numberOfIterations
+ kMeansAccuracy = CalculateAccuracy(kMeansRejectedNormals,kMeansAcceptedOutliers,testSet)
+ kcenterRejectedNormals=  kcenterRejectedNormals/numberOfIterations
+ kcenterAcceptedOutliers=  kcenterAcceptedOutliers/numberOfIterations
+ kcenterTrainingRuntime= kcenterTrainingRuntime/numberOfIterations
+ kcenterTestingRuntime= kcenterTestingRuntime/numberOfIterations
+ kcenterAccuracy=CalculateAccuracy(kcenterRejectedNormals,kcenterAcceptedOutliers,testSet)
+ nddRejectedNormals= nddRejectedNormals/numberOfIterations
+ nddAcceptedOutliers=  nddAcceptedOutliers/numberOfIterations
+ nddTrainingRuntime= (nddTrainingRuntime/numberOfIterations)
+ nddTestingRuntime= (nddTestingRuntime/numberOfIterations)
+ nddAccuracy=CalculateAccuracy(nddRejectedNormals,nddAcceptedOutliers,testSet)
+ parzenWindowsRejectedNormals = parzenWindowsRejectedNormals/numberOfIterations
+ parzenWindowsAcceptedOutliers=  parzenWindowsAcceptedOutliers/numberOfIterations
+ parzenWindowsTrainingRuntime=(parzenWindowsTrainingRuntime/numberOfIterations)
+ parzenWindowsTestingRuntime=(parzenWindowsTestingRuntime/numberOfIterations)
+ parzenWindowsAccuracy=CalculateAccuracy(parzenWindowsRejectedNormals,parzenWindowsAcceptedOutliers,testSet)
+ somRejectedNormals= somRejectedNormals/numberOfIterations
+ somAcceptedOutliers= somAcceptedOutliers/numberOfIterations
+ somTrainingRuntime=(somTrainingRuntime/numberOfIterations)
+ somTestingRuntime=(somTestingRuntime/numberOfIterations)
+ somAccuracy=CalculateAccuracy(somRejectedNormals,somAcceptedOutliers,testSet)
+ trainingRuntimes=[kcenterTrainingRuntime*1000,parzenWindowsTrainingRuntime*1000,rfddTrainingRuntime*1000,nddTrainingRuntime*1000,svddTrainingRuntime*1000,kMeansTrainingRuntime*1000,somTrainingRuntime*1000];
+ testingRuntimes=[kcenterTestingRuntime*1000,parzenWindowsTestingRuntime*1000,rfddTestingRuntime*1000,nddTestingRuntime*1000,svddTestingRuntime*1000,kMeansTestingRuntime*1000,somTestingRuntime*1000];
+ accuracies=[ kcenterAccuracy,parzenWindowsAccuracy,rfddAccuracy,nddAccuracy,svddAccuracy,kMeansAccuracy,somAccuracy];
+ figure(1);clf;
+ bar([testingRuntimes' trainingRuntimes']);
+ colormap(gray)
+ legend('Testing runtime','Training runtime');
+ title('Training runtimes');
+ set(gca,'XTickLabel',{'kcenter','parzen','rfdd','ndd','svdd','kMeans','som'});
+ set(gca, 'YScale', 'log');
+ ylabel('Time in milliseconds (log)');
+ figure(2);clf;
+ bar(accuracies);
+ colormap(gray)
+ title('Accuracies');
+ set(gca,'XTickLabel',{'kcenter','parzen','rfdd','ndd','svdd','kMeans','som'});
+ %% References
+ % # PRTools4, A Matlab Toolbox for Pattern Recognition Version 4.1
+ % (R.P.W. Duin,D.M.J. Tax et al.)
+ % # <http://csegroups.case.edu/bearingdatacenter/pages/welcome-case-western-reserve-university-bearing-data-center-website>
+
+
+  

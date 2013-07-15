@@ -81,7 +81,7 @@ plot(x,normalFeatures(1:15,15),normalLine,...
 title('First 15 Higuchi Fractal Dimensions with k=6')
 ylim([1.5,2.4]);
 ylabel('Fractal Dimension')
-legend('normal','Ball fault','Outer raceway Fault','Inner raceway fault');
+legend('Normal','Ball fault','Outer raceway fault','Inner raceway fault');
 %% References
 %%
 % # PRTools4, A Matlab Toolbox for Pattern Recognition Version 4.1
